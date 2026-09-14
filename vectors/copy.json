@@ -3704,6 +3704,229 @@
           }
         }
       ]
+    },
+    {
+      "id": "copy-0049",
+      "group": "copy",
+      "kind": "api",
+      "title": "CopyObject of an object over 5 GiB is rejected; UploadPartCopy in parts copies it",
+      "description": "S3 copies at most 5 GiB in one CopyObject and directs larger objects to multipart copy. The source is one byte over the limit, so it is itself built as two parts (a single PUT is capped at 5 GiB). The single-request copy fails with InvalidRequest; the same object copies as two UploadPartCopy ranges. Tagged large: the run generates and uploads 5 GiB.",
+      "tags": [
+        "tier-1",
+        "copy",
+        "multipart",
+        "errors",
+        "large",
+        "source:aws-docs"
+      ],
+      "source": "https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html",
+      "prerequisites": [
+        {
+          "$bucket": {
+            "handle": "b1"
+          }
+        }
+      ],
+      "data": {
+        "src": {
+          "$pattern": {
+            "pattern": "x",
+            "size": 5368709121
+          }
+        },
+        "p1": {
+          "$slice": {
+            "of": "src",
+            "offset": 0,
+            "length": 5368709120
+          }
+        },
+        "p2": {
+          "$slice": {
+            "of": "src",
+            "offset": 5368709120,
+            "length": 1
+          }
+        }
+      },
+      "steps": [
+        {
+          "$operation": {
+            "name": "CreateMultipartUpload",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big"
+            },
+            "capture": {
+              "uploadId": "UploadId"
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "UploadPart",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big",
+              "UploadId": "${cap.uploadId}",
+              "PartNumber": 1,
+              "Body": {
+                "$data": "p1"
+              }
+            },
+            "capture": {
+              "e1": "ETag"
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "UploadPart",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big",
+              "UploadId": "${cap.uploadId}",
+              "PartNumber": 2,
+              "Body": {
+                "$data": "p2"
+              }
+            },
+            "capture": {
+              "e2": "ETag"
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "CompleteMultipartUpload",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big",
+              "UploadId": "${cap.uploadId}",
+              "MultipartUpload": {
+                "Parts": [
+                  {
+                    "PartNumber": 1,
+                    "ETag": "${cap.e1}"
+                  },
+                  {
+                    "PartNumber": 2,
+                    "ETag": "${cap.e2}"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "HeadObject",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big"
+            },
+            "expect": {
+              "response": {
+                "ContentLength": 5368709121
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "CopyObject",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big-copy",
+              "CopySource": "${res.b1.name}/big"
+            },
+            "expect": {
+              "status": 400,
+              "error": "InvalidRequest"
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "CreateMultipartUpload",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big-copy"
+            },
+            "capture": {
+              "copyId": "UploadId"
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "UploadPartCopy",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big-copy",
+              "UploadId": "${cap.copyId}",
+              "PartNumber": 1,
+              "CopySource": "${res.b1.name}/big",
+              "CopySourceRange": "bytes=0-5368709119"
+            },
+            "capture": {
+              "c1": "CopyPartResult.ETag"
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "UploadPartCopy",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big-copy",
+              "UploadId": "${cap.copyId}",
+              "PartNumber": 2,
+              "CopySource": "${res.b1.name}/big",
+              "CopySourceRange": "bytes=5368709120-5368709120"
+            },
+            "capture": {
+              "c2": "CopyPartResult.ETag"
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "CompleteMultipartUpload",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big-copy",
+              "UploadId": "${cap.copyId}",
+              "MultipartUpload": {
+                "Parts": [
+                  {
+                    "PartNumber": 1,
+                    "ETag": "${cap.c1}"
+                  },
+                  {
+                    "PartNumber": 2,
+                    "ETag": "${cap.c2}"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "HeadObject",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "big-copy"
+            },
+            "expect": {
+              "response": {
+                "ContentLength": 5368709121
+              }
+            }
+          }
+        }
+      ]
     }
   ]
 }

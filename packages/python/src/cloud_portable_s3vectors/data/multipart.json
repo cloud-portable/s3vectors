@@ -12888,8 +12888,8 @@
       "id": "multipart-0097",
       "group": "multipart",
       "kind": "api",
-      "title": "UploadPartCopy CopySourceIfModifiedSince: past date succeeds, future date returns PreconditionFailed",
-      "description": "The source test used now-1day and now+1day; fixed far-past and far-future dates preserve the semantics. AWS returns 412 PreconditionFailed for the unmet condition; the source test also accepted NotModified from other implementations.",
+      "title": "UploadPartCopy CopySourceIfModifiedSince: a past date copies, and a future date is ignored and copies too",
+      "description": "The source test used now-1day and now+1day and expected the future date to fail with NotModified or PreconditionFailed. AWS ignores a future If-Modified-Since and completes the copy, so both steps expect success (fixed far-past and far-future dates stand in for the relative ones). The 412 PreconditionFailed arises only for a date after the source object's last-modified time that is not in the future.",
       "tags": [
         "tier-1",
         "multipart",
