@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "total": 1185,
+  "total": 1186,
   "schemaSha256": "5bf42eee7982ba136d38bc2667697f3387b0bf1928191e067bcef35707a811b9",
   "groups": [
     {
@@ -36,7 +36,7 @@
     {
       "group": "copy",
       "file": "copy.json",
-      "count": 48
+      "count": 49
     },
     {
       "group": "cors",

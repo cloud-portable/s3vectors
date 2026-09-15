@@ -71,7 +71,14 @@ Every vector has:
 
   Other conventional tags: the feature group (`multipart`, `versioning`, …), provenance
   (`source:ceph-s3-tests`, `source:msst-s3`, `source:aws-sigv4-suite`,
-  `source:storage-test`), quirk markers, and free-form compliance overlays (`soc2`).
+  `source:storage-test`, `source:aws-docs` for a vector written from the AWS API
+  reference rather than converted from a suite), `large` for a vector whose data
+  runs to gigabytes (the 5 GiB copy-source limit needs a source over 5 GiB), so a
+  routine run can skip it by tag, quirk markers, and free-form compliance overlays
+  (`soc2`). `large` is required on any vector declaring a dataset over 64 MiB, and
+  the validator enforces it: the package test suites skip generating a dataset that
+  big, so the tag is what keeps a gigabyte-scale vector from losing that coverage
+  silently.
   Quirk markers share the `quirk:` prefix and flag behavior a general-purpose AWS S3
   endpoint does not reproduce, so a target tracking AWS filters them by prefix (see
   `quirk:*` filtering in the runner packages): `quirk:not-aws` (a non-AWS implementation
