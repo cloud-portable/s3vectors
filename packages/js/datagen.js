@@ -2,26 +2,83 @@
 // derived digest values. Normative prose: the repository README, "Generated data".
 import { createHash } from 'node:crypto'
 
-// block(i) = SHA256(UTF8(seed) || BE64(i)); stream = block(0) || block(1) || ...
-function prng (seed, size) {
-  const out = Buffer.alloc(size)
-  const seeded = createHash('sha256').update(Buffer.from(seed, 'utf8'))
-  const counter = Buffer.alloc(8)
-  for (let off = 0, i = 0n; off < size; off += 32, i++) {
-    counter.writeBigUInt64BE(i)
-    const block = seeded.copy().update(counter).digest()
-    block.copy(out, off, 0, Math.min(32, size - off))
+/** Bytes per chunk when streaming or digesting. A multiple of the 32-byte prng block. */
+export const CHUNK_SIZE = 1024 * 1024
+
+// A dataset resolved to the stream it reads from. `base` is the absolute offset of
+// the dataset's byte 0 within that stream, which is what makes a $slice free: a
+// slice is its parent with a starting offset. Seed/pattern bytes are decoded once.
+function resolve (specs, name) {
+  const spec = specs[name]
+  if (!spec) throw new Error(`unknown dataset: ${name}`)
+  if (spec.$prng) {
+    const seeded = createHash('sha256').update(Buffer.from(spec.$prng.seed, 'utf8'))
+    return { seeded, pat: null, base: 0, length: spec.$prng.size }
   }
-  return out
+  if (spec.$pattern) {
+    const d = spec.$pattern
+    let pat
+    if (d.pattern !== undefined) pat = Buffer.from(d.pattern, 'utf8')
+    else if (d.patternBase64 !== undefined) pat = Buffer.from(d.patternBase64, 'base64')
+    else throw new Error(`dataset '${name}': neither pattern nor patternBase64`)
+    if (pat.length === 0) throw new Error('empty pattern')
+    return { seeded: null, pat, base: 0, length: d.size }
+  }
+  if (spec.$slice) {
+    const d = spec.$slice
+    const parent = specs[d.of]
+    if (!parent) throw new Error(`slice '${name}' references unknown dataset '${d.of}'`)
+    if (parent.$slice) throw new Error(`slice '${name}' references slice '${d.of}' (chained slices are not allowed)`)
+    const src = resolve(specs, d.of) // validates the parent; generates nothing
+    if (d.offset > src.length || d.length > src.length - d.offset) {
+      throw new Error(`slice '${name}' [${d.offset}, ${d.offset + d.length}) exceeds '${d.of}' size ${src.length}`)
+    }
+    return { seeded: src.seeded, pat: src.pat, base: src.base + d.offset, length: d.length }
+  }
+  throw new Error(`unknown data kind: ${JSON.stringify(Object.keys(spec))}`)
 }
 
-function pattern (patternBytes, size) {
-  if (patternBytes.length === 0) throw new Error('empty pattern')
-  const out = Buffer.alloc(size)
-  for (let off = 0; off < size; off += patternBytes.length) {
-    patternBytes.copy(out, off, 0, Math.min(patternBytes.length, size - off))
+// Written so no intermediate can overflow: never `offset + length > size`.
+function checkRange (name, size, offset, length) {
+  if (!Number.isInteger(offset) || !Number.isInteger(length) || offset < 0 || length < 0) {
+    throw new Error(`invalid range [${offset}, ${length}) for dataset '${name}'`)
   }
-  return out
+  if (offset > size || length > size - offset) {
+    throw new Error(`range [${offset}, ${offset + length}) exceeds dataset '${name}' size ${size}`)
+  }
+}
+
+// Write `n` bytes of `src`, starting at `offset` within the dataset, into `dst`.
+// The only windowing code; every public entry point goes through it.
+function readInto (src, offset, dst, n) {
+  if (n === 0) return // (abs + n - 1) would underflow below
+  const abs = src.base + offset
+
+  if (src.pat) {
+    // byte N of the stream is pattern[N % L], so a range starts at phase abs % L
+    const L = src.pat.length
+    const first = Math.min(n, L)
+    const phase = abs % L
+    for (let k = 0; k < first; k++) dst[k] = src.pat[(phase + k) % L]
+    for (let filled = first; filled < n;) {
+      const m = Math.min(filled, n - filled)
+      dst.copy(dst, filled, 0, m)
+      filled += m
+    }
+    return
+  }
+
+  // block(i) = SHA256(UTF8(seed) || BE64(i)); stream = block(0) || block(1) || ...
+  const counter = Buffer.alloc(8)
+  const lastBlk = Math.floor((abs + n - 1) / 32)
+  for (let i = Math.floor(abs / 32); i <= lastBlk; i++) {
+    counter.writeBigUInt64BE(BigInt(i))
+    const block = src.seeded.copy().update(counter).digest()
+    const blkStart = i * 32
+    const lo = Math.max(abs, blkStart) - blkStart // head trim, nonzero on the first block only
+    const hi = Math.min(abs + n, blkStart + 32) - blkStart // clamped to the range end, not the dataset size
+    block.copy(dst, blkStart + lo - abs, lo, hi)
+  }
 }
 
 /**
@@ -31,30 +88,71 @@ function pattern (patternBytes, size) {
  * @returns {Buffer}
  */
 export function generate (specs, name) {
-  const spec = specs[name]
-  if (!spec) throw new Error(`unknown dataset: ${name}`)
-  if (spec.$prng) {
-    return prng(spec.$prng.seed, spec.$prng.size)
+  const src = resolve(specs, name)
+  const out = Buffer.alloc(src.length)
+  readInto(src, 0, out, src.length)
+  return out
+}
+
+/**
+ * Materialize `[offset, offset+length)` of a dataset without materializing the rest.
+ * @param {Record<string, object>} specs the vector's `data` map
+ * @param {string} name
+ * @param {number} offset first byte of the dataset to produce
+ * @param {number} length bytes to produce
+ * @returns {Buffer}
+ */
+export function generateRange (specs, name, offset, length) {
+  const src = resolve(specs, name)
+  checkRange(name, src.length, offset, length)
+  const out = Buffer.alloc(length)
+  readInto(src, offset, out, length)
+  return out
+}
+
+/**
+ * A bounded-memory byte stream over a dataset (or a range of one) — the only way
+ * to read a dataset larger than the platform's maximum allocation. Every chunk is
+ * `chunkSize` bytes except the last; a zero-length range yields no chunks. The
+ * spec is validated eagerly, so errors throw from this call, never mid-stream.
+ * @param {Record<string, object>} specs the vector's `data` map
+ * @param {string} name
+ * @param {{ offset?: number, length?: number, chunkSize?: number }} [opts]
+ * @returns {ReadableStream<Buffer>}
+ */
+export function generateStream (specs, name, opts = {}) {
+  const src = resolve(specs, name)
+  const offset = opts.offset ?? 0
+  const length = opts.length ?? (Number.isInteger(offset) && offset >= 0 ? src.length - offset : 0)
+  checkRange(name, src.length, offset, length)
+  const chunkSize = opts.chunkSize ?? CHUNK_SIZE
+  if (!Number.isInteger(chunkSize) || chunkSize <= 0) {
+    throw new Error(`invalid chunkSize ${chunkSize} for dataset '${name}'`)
   }
-  if (spec.$pattern) {
-    const d = spec.$pattern
-    return pattern(
-      d.pattern !== undefined ? Buffer.from(d.pattern, 'utf8') : Buffer.from(d.patternBase64, 'base64'),
-      d.size
-    )
-  }
-  if (spec.$slice) {
-    const d = spec.$slice
-    const parent = specs[d.of]
-    if (!parent) throw new Error(`slice '${name}' references unknown dataset '${d.of}'`)
-    if (parent.$slice) throw new Error(`slice '${name}' references slice '${d.of}' (chained slices are not allowed)`)
-    const base = generate(specs, d.of)
-    if (d.offset + d.length > base.length) {
-      throw new Error(`slice '${name}' [${d.offset}, ${d.offset + d.length}) exceeds '${d.of}' size ${base.length}`)
+  let pos = 0
+  return new ReadableStream({
+    pull (controller) {
+      if (pos >= length) {
+        controller.close()
+        return
+      }
+      const n = Math.min(chunkSize, length - pos)
+      const chunk = Buffer.alloc(n)
+      readInto(src, offset + pos, chunk, n)
+      pos += n
+      controller.enqueue(chunk)
     }
-    return base.subarray(d.offset, d.offset + d.length)
-  }
-  throw new Error(`unknown data kind: ${JSON.stringify(Object.keys(spec))}`)
+  })
+}
+
+/**
+ * The dataset's declared length in bytes, without generating it.
+ * @param {Record<string, object>} specs the vector's `data` map
+ * @param {string} name
+ * @returns {number}
+ */
+export function dataSize (specs, name) {
+  return resolve(specs, name).length
 }
 
 function makeCrc32Table (poly) {
@@ -70,10 +168,11 @@ function makeCrc32Table (poly) {
 const CRC32_TABLE = makeCrc32Table(0xEDB88320)
 const CRC32C_TABLE = makeCrc32Table(0x82F63B78)
 
-function crc32 (buf, table) {
-  let c = 0xFFFFFFFF
+// The update functions carry the raw register, so a digest can be accumulated
+// across chunks: seed it with the all-ones init once, xor it out once at the end.
+function crc32Update (c, buf, table) {
   for (let i = 0; i < buf.length; i++) c = table[(c ^ buf[i]) & 0xFF] ^ (c >>> 8)
-  return (c ^ 0xFFFFFFFF) >>> 0
+  return c >>> 0
 }
 
 // CRC-64/NVME: reflected poly 0x9A6C9329AC4BC9B5, init/xorout all-ones.
@@ -88,12 +187,11 @@ const CRC64_TABLE = (() => {
   return table
 })()
 
-function crc64nvme (buf) {
-  let c = 0xFFFFFFFFFFFFFFFFn
+function crc64Update (c, buf) {
   for (let i = 0; i < buf.length; i++) {
     c = CRC64_TABLE[Number((c ^ BigInt(buf[i])) & 0xFFn)] ^ (c >> 8n)
   }
-  return c ^ 0xFFFFFFFFFFFFFFFFn
+  return c
 }
 
 function u32ToBase64 (v) {
@@ -113,26 +211,58 @@ export const DERIVED_FIELDS = Object.freeze([
   'size', 'md5', 'etag', 'sha256', 'sha256B64', 'sha1B64', 'crc32B64', 'crc32cB64', 'crc64nvmeB64'
 ])
 
+// Digests are computed over chunks so peak memory is one chunk, whatever the
+// dataset size. `size` reads no bytes at all. Note this bounds memory, not time:
+// every field re-reads the dataset, so do not loop DERIVED_FIELDS over a
+// multi-gigabyte dataset. Exported unlisted in datagen.d.ts: the chunk size is a
+// test seam, not public API.
+export function __derivedChunked (specs, name, field, chunkSize) {
+  const src = resolve(specs, name)
+  if (field === 'size') return String(src.length)
+
+  let hash = null
+  let table = null
+  let crc = 0xFFFFFFFF
+  let crc64 = 0xFFFFFFFFFFFFFFFFn
+  switch (field) {
+    case 'md5': case 'etag': hash = createHash('md5'); break
+    case 'sha256': case 'sha256B64': hash = createHash('sha256'); break
+    case 'sha1B64': hash = createHash('sha1'); break
+    case 'crc32B64': table = CRC32_TABLE; break
+    case 'crc32cB64': table = CRC32C_TABLE; break
+    case 'crc64nvmeB64': break
+    default: throw new Error(`unknown derived data field: ${field}`)
+  }
+
+  const buf = Buffer.alloc(Math.min(chunkSize, src.length) || 1)
+  for (let pos = 0; pos < src.length; pos += chunkSize) {
+    const n = Math.min(chunkSize, src.length - pos)
+    const chunk = buf.subarray(0, n)
+    readInto(src, pos, chunk, n)
+    if (hash) hash.update(chunk)
+    else if (table) crc = crc32Update(crc, chunk, table)
+    else crc64 = crc64Update(crc64, chunk)
+  }
+
+  switch (field) {
+    case 'md5': return hash.digest('hex')
+    case 'etag': return `"${hash.digest('hex')}"`
+    case 'sha256': return hash.digest('hex')
+    case 'sha256B64': return hash.digest('base64')
+    case 'sha1B64': return hash.digest('base64')
+    case 'crc32B64': case 'crc32cB64': return u32ToBase64((crc ^ 0xFFFFFFFF) >>> 0)
+    default: return u64ToBase64(crc64 ^ 0xFFFFFFFFFFFFFFFFn)
+  }
+}
+
 /**
  * Compute a derived string value of a dataset (what a `${data.<name>.<field>}`
- * placeholder resolves to).
+ * placeholder resolves to). Computed in bounded memory, whatever the dataset size.
  * @param {Record<string, object>} specs the vector's `data` map
  * @param {string} name
  * @param {string} field one of DERIVED_FIELDS
  * @returns {string}
  */
 export function derived (specs, name, field) {
-  const bytes = generate(specs, name)
-  switch (field) {
-    case 'size': return String(bytes.length)
-    case 'md5': return createHash('md5').update(bytes).digest('hex')
-    case 'etag': return `"${createHash('md5').update(bytes).digest('hex')}"`
-    case 'sha256': return createHash('sha256').update(bytes).digest('hex')
-    case 'sha256B64': return createHash('sha256').update(bytes).digest('base64')
-    case 'sha1B64': return createHash('sha1').update(bytes).digest('base64')
-    case 'crc32B64': return u32ToBase64(crc32(bytes, CRC32_TABLE))
-    case 'crc32cB64': return u32ToBase64(crc32(bytes, CRC32C_TABLE))
-    case 'crc64nvmeB64': return u64ToBase64(crc64nvme(bytes))
-    default: throw new Error(`unknown derived data field: ${field}`)
-  }
+  return __derivedChunked(specs, name, field, CHUNK_SIZE)
 }
