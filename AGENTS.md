@@ -90,7 +90,9 @@ node scripts/sync-packages.js --check # drift gate (CI runs this)
 ```
 
 Notes: the Python corpus test caps dataset sizes (pure-python CRC is slow) —
-`S3VECTORS_FULL=1` lifts the cap. Rust tests rely on `[profile.test]
+`S3VECTORS_FULL=1` lifts that cap. No suite materializes a dataset over 64 MiB
+whatever the env: those run to gigabytes, and `validate.js` requires the vector
+to carry the `large` tag. Rust tests rely on `[profile.test]
 opt-level = 2` in its Cargo.toml; don't remove it (hashing 2 GiB unoptimized
 takes ~100 s).
 

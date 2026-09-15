@@ -28,6 +28,10 @@ const RESOURCE_ATTRS = {
 }
 const DERIVED_FIELDS = new Set(datagen.DERIVED_FIELDS)
 
+// A dataset above this materializes into gigabytes. The package datagen tests
+// skip generating one, so the vector has to declare the cost with a `large` tag.
+const LARGE_DATA_BYTES = 64 * 1024 * 1024
+
 const errors = []
 function fail (file, vectorId, msg) {
   errors.push(`${file}${vectorId ? ` [${vectorId}]` : ''}: ${msg}`)
@@ -119,6 +123,15 @@ function lintApiVector (file, v, opts) {
     if (!parent) fail(file, v.id, `slice '${name}' references unknown dataset '${s.of}'`)
     else if (parent.$slice) fail(file, v.id, `slice '${name}' references slice '${s.of}' (chained slices not allowed)`)
     else if (s.offset + s.length > (parent.$prng ?? parent.$pattern).size) fail(file, v.id, `slice '${name}' exceeds bounds of '${s.of}'`)
+  }
+
+  // gigabyte-scale datasets must advertise themselves (the package datagen
+  // tests skip them, and a runner needs the tag to budget the run)
+  const oversized = Object.entries(data)
+    .filter(([, spec]) => !spec.$slice && (spec.$prng ?? spec.$pattern).size > LARGE_DATA_BYTES)
+    .map(([name]) => name)
+  if (oversized.length > 0 && !v.tags.includes('large')) {
+    fail(file, v.id, `dataset(s) ${oversized.join(', ')} exceed ${LARGE_DATA_BYTES} bytes: tag the vector 'large'`)
   }
 
   // $data content-descriptor references
