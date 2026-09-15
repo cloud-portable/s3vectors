@@ -296,6 +296,9 @@ func TestDigestDoesNotDependOnChunking(t *testing.T) {
 // terms of Generate.
 func expectedWindow(t *testing.T, spec s3vectors.DataSpec, offset, length int64) []byte {
 	t.Helper()
+	if length == 0 { // offset + length - 1 would go negative below
+		return nil
+	}
 	out := make([]byte, length)
 	if spec.Pattern != nil {
 		var pat []byte

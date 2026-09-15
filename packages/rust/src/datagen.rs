@@ -389,7 +389,15 @@ fn derived_chunked(
     let mut crc32c = CRC32C.digest();
     let mut crc64 = CRC64NVME.digest();
 
-    let cap = usize::min(chunk_size, to_usize(name, src.length, src.length)?).max(1);
+    // Derive the buffer from chunk_size, and narrow src.length only when it is the
+    // smaller of the two: a multi-gigabyte dataset digests fine on a 32-bit target
+    // because only one chunk is ever allocated.
+    let cap = if src.length < chunk_size as u64 {
+        src.length as usize
+    } else {
+        chunk_size
+    }
+    .max(1);
     let mut buf = vec![0u8; cap];
     let mut pos = 0u64;
     while pos < src.length {

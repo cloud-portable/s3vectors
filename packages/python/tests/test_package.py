@@ -97,13 +97,18 @@ class TestDatagen(unittest.TestCase):
                 datagen.generate_range(SPECS, name, offset, length)
         with self.assertRaisesRegex(ValueError, "invalid range"):
             datagen.generate_range(SPECS, "t40", -1, 1)
+        # Non-integers must fail here, not later inside the read with a TypeError.
+        for offset, length in ((0.5, 1), (0, 1.5), (True, 1), (0, False)):
+            with self.assertRaisesRegex(ValueError, "invalid range"):
+                datagen.generate_range(SPECS, "t40", offset, length)
 
         # Streams validate eagerly: the error comes from the call, not the first
         # next(). A generator function here would defer all of this.
         with self.assertRaisesRegex(ValueError, "exceeds"):
             datagen.generate_stream(SPECS, "over")
-        with self.assertRaisesRegex(ValueError, "invalid chunk_size"):
-            datagen.generate_stream(SPECS, "t40", chunk_size=0)
+        for bad in (0, -1, 1.5, True):
+            with self.assertRaisesRegex(ValueError, "invalid chunk_size"):
+                datagen.generate_stream(SPECS, "t40", chunk_size=bad)
 
     def test_ranged_reads(self):
         self.assertEqual(datagen.generate_range(SPECS, "t40", 30, 6).hex(), STREAM40[60:72])
@@ -229,6 +234,8 @@ class TestCorpus(unittest.TestCase):
         Used to check windows of a dataset too big to materialize; deliberately
         not written in terms of generate().
         """
+        if length == 0:
+            return b""  # offset + length - 1 would go negative below
         if "$pattern" in spec:
             d = spec["$pattern"]
             pat = d["pattern"].encode() if "pattern" in d else base64.b64decode(d["patternBase64"])

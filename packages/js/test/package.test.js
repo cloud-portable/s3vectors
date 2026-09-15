@@ -201,6 +201,7 @@ test('vector shape smoke', () => {
 // An independent statement of the normative formula, used to check windows of a
 // dataset too big to materialize. Deliberately not written in terms of generate().
 function expectedWindow (spec, offset, length) {
+  if (length === 0) return Buffer.alloc(0) // offset + length - 1 would go negative below
   const out = Buffer.alloc(length)
   if (spec.$pattern) {
     const d = spec.$pattern

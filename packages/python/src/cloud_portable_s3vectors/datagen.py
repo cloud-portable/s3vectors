@@ -88,8 +88,10 @@ def _resolve(specs: Mapping[str, Mapping[str, Any]], name: str) -> _Source:
 
 def _check_range(name: str, size: int, offset: int, length: int) -> None:
     # Written so no intermediate can overflow: never ``offset + length > size``.
+    if not isinstance(offset, int) or not isinstance(length, int) or isinstance(offset, bool) or isinstance(length, bool):
+        raise ValueError(f"invalid range offset {offset!r} length {length!r} for dataset {name!r}")
     if offset < 0 or length < 0:
-        raise ValueError(f"invalid range [{offset}, {length}) for dataset {name!r}")
+        raise ValueError(f"invalid range offset {offset} length {length} for dataset {name!r}")
     if offset > size or length > size - offset:
         raise ValueError(f"range [{offset}, {offset + length}) exceeds dataset {name!r} size {size}")
 
@@ -112,8 +114,11 @@ def _read_range(src: _Source, offset: int, n: int) -> bytes:
         return (rotated * (n // L + 1))[:n]
 
     # block(i) = SHA256(UTF8(seed) || BE64(i)); stream = block(0) || block(1) || ...
+    # Filled in place through a memoryview: accumulating one bytes object per
+    # 32-byte block costs several times the payload in peak memory.
     seeded = hashlib.sha256(src.seed)
-    blocks = []
+    out = bytearray(n)
+    mv = memoryview(out)
     for i in range(abs_off // 32, (abs_off + n - 1) // 32 + 1):
         h = seeded.copy()
         h.update(struct.pack(">Q", i))
@@ -121,8 +126,13 @@ def _read_range(src: _Source, offset: int, n: int) -> bytes:
         blk_start = i * 32
         lo = max(abs_off, blk_start) - blk_start  # head trim, nonzero on the first block only
         hi = min(abs_off + n, blk_start + 32) - blk_start  # clamped to the range end, not the dataset size
-        blocks.append(block[lo:hi])
-    return b"".join(blocks)
+        at = blk_start + lo - abs_off
+        if hi - lo == 32:
+            mv[at:at + 32] = block  # whole block, no slice of the digest
+        else:
+            mv[at:at + (hi - lo)] = block[lo:hi]
+    mv.release()
+    return bytes(out)
 
 
 def generate(specs: Mapping[str, Mapping[str, Any]], name: str) -> bytes:
@@ -160,8 +170,8 @@ def generate_stream(
         _check_range(name, src.length, offset, 0)
         length = src.length - offset
     _check_range(name, src.length, offset, length)
-    if chunk_size <= 0:
-        raise ValueError(f"invalid chunk_size {chunk_size} for dataset {name!r}")
+    if not isinstance(chunk_size, int) or isinstance(chunk_size, bool) or chunk_size <= 0:
+        raise ValueError(f"invalid chunk_size {chunk_size!r} for dataset {name!r}")
     return _iter_range(src, offset, length, chunk_size)
 
 

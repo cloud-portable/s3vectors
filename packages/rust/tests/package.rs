@@ -375,6 +375,9 @@ fn full_corpus_datagen_pass() {
 /// dataset too big to materialize. Deliberately not written in terms of generate().
 fn expected_window(spec: &DataSpec, offset: u64, length: u64) -> Vec<u8> {
     use sha2::{Digest as _, Sha256};
+    if length == 0 {
+        return Vec::new(); // offset + length - 1 would underflow below
+    }
     let mut out = vec![0u8; length as usize];
     match spec {
         DataSpec::Pattern(d) => {

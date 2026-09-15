@@ -51,7 +51,7 @@ function resolve (specs, name) {
 // Written so no intermediate can overflow: never `offset + length > size`.
 function checkRange (name, size, offset, length) {
   if (!Number.isInteger(offset) || !Number.isInteger(length) || offset < 0 || length < 0) {
-    throw new Error(`invalid range [${offset}, ${length}) for dataset '${name}'`)
+    throw new Error(`invalid range offset ${offset} length ${length} for dataset '${name}'`)
   }
   if (offset > size || length > size - offset) {
     throw new Error(`range [${offset}, ${offset + length}) exceeds dataset '${name}' size ${size}`)

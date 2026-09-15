@@ -106,7 +106,7 @@ func resolve(specs map[string]s3vectors.DataSpec, name string) (source, error) {
 // checkRange is written so no intermediate can overflow: never offset+length > size.
 func checkRange(name string, size, offset, length int64) error {
 	if offset < 0 || length < 0 {
-		return fmt.Errorf("invalid range [%d, %d) for dataset %q", offset, length, name)
+		return fmt.Errorf("invalid range offset %d length %d for dataset %q", offset, length, name)
 	}
 	if offset > size || length > size-offset {
 		return fmt.Errorf("range [%d, %d) exceeds dataset %q size %d", offset, offset+length, name, size)
