@@ -26,11 +26,15 @@ for file in s3v::all() {
 let mp = s3v::group("multipart").unwrap();
 
 // deterministic payloads + the digest values ${data.<name>.<field>} resolve to
-use s3v::datagen::{generate, derived, DerivedField};
+use s3v::datagen::{generate, generate_range, derived, DerivedField, Reader};
 let s3v::Vector::Api(v) = &mp.vectors[0] else { unreachable!() };
 let data = v.data.as_ref().unwrap();
 let part1 = generate(data, "part1")?;                       // Vec<u8>
 let etag = derived(data, "big", DerivedField::Etag)?;       // "\"<md5hex>\""
+
+// datasets are seekable: read a window, or stream one too big to hold
+let window = generate_range(data, "big", 1024, 256)?;       // Vec<u8>
+let reader = Reader::new(data, "big")?;                     // impl std::io::Read
 ```
 
 `s3v::manifest()` reports the embedded corpus version, per-group counts and the

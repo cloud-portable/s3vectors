@@ -27,6 +27,10 @@ mp, err := s3vectors.Group("multipart")
 v := &mp.Vectors[0]
 part1, err := datagen.Generate(v.Data, "part1")        // []byte
 etag, err := datagen.Derived(v.Data, "big", "etag")    // "\"<md5hex>\""
+
+// datasets are seekable: read a window, or stream one too big to hold
+window, err := datagen.GenerateRange(v.Data, "big", 1024, 256)  // []byte
+r, err := datagen.NewReader(v.Data, "big")                      // io.Reader + io.Seeker
 ```
 
 `s3vectors.Manifest()` reports the embedded corpus version, per-group counts and

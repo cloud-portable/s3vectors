@@ -55,8 +55,13 @@ resources/               cloned upstream test suites (source material) — read-
    `scripts/datagen.js` (normative) and the ports in packages/js, python, go,
    rust. Any algorithm change must land in all five plus their shared
    check-value fixtures (prng seed "test" block hashes; CRCs of "123456789";
-   md5("AAAAA")). Bodies ≥ 1 KiB in vectors use `data` specs, never inline
-   strings; never hardcode digests of `$prng` data — use `${data.<name>.<field>}`.
+   md5("AAAAA")), and their shared invariants: a range equals the same window of
+   the whole dataset, a stream concatenates to the same bytes, and a digest is the
+   same at any chunk size. `sync-packages.js` does **not** copy the datagen
+   sources — they are hand-maintained ports, so those suites are the only thing
+   that detects a divergent one.
+   Bodies ≥ 1 KiB in vectors use `data` specs, never inline strings; never
+   hardcode digests of `$prng` data — use `${data.<name>.<field>}`.
 6. **A format/schema change is a five-place change**: schema + README prose +
    the corpus (write an idempotent migration script, verify counts before ==
    after) + all four package models + their tests. Go's `DisallowUnknownFields`
@@ -91,8 +96,10 @@ node scripts/sync-packages.js --check # drift gate (CI runs this)
 
 Notes: the Python corpus test caps dataset sizes (pure-python CRC is slow) —
 `S3VECTORS_FULL=1` lifts that cap. No suite materializes a dataset over 64 MiB
-whatever the env: those run to gigabytes, and `validate.js` requires the vector
-to carry the `large` tag. Rust tests rely on `[profile.test]
+whatever the env: those run to gigabytes, `validate.js` requires the vector to
+carry the `large` tag, and the suites spot-check them with ranged reads (the ends
+plus a window straddling each 32-bit boundary) against an independent statement of
+the formula. Rust tests rely on `[profile.test]
 opt-level = 2` in its Cargo.toml; don't remove it (hashing 2 GiB unoptimized
 takes ~100 s).
 
@@ -119,4 +126,10 @@ takes ~100 s).
   rust has only serde + serde_json unconditionally (hash crates sit behind the
   default `datagen` feature); `scripts/` uses ajv (dev-only). Don't add more.
 - Keep package public APIs in lockstep across languages: `groups` / `load(group)`
-  / `all()` / `manifest()` and `datagen.generate` / `datagen.derived`.
+  / `all()` / `manifest()` and `datagen.generate` / `generateRange` / `dataSize` /
+  `derived`. The streaming form is language-shaped, so it is the one place the
+  names differ: JS `generateStream` → a web `ReadableStream`, Python
+  `generate_stream` → `Iterator[bytes]`, Go `NewReader`/`NewRangeReader` →
+  `*Reader` (`io.Reader` + `io.Seeker`), Rust `Reader::new`/`Reader::range` →
+  `impl Read`. JS and Python take a chunk size; Go and Rust take theirs from the
+  caller's buffer.

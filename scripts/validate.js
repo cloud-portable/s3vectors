@@ -29,7 +29,9 @@ const RESOURCE_ATTRS = {
 const DERIVED_FIELDS = new Set(datagen.DERIVED_FIELDS)
 
 // A dataset above this materializes into gigabytes. The package datagen tests
-// skip generating one, so the vector has to declare the cost with a `large` tag.
+// never hold one — they spot-check it with ranged reads instead — so the vector
+// has to declare the cost with a `large` tag. Keep this equal to the suites'
+// 64 MiB spot-check threshold (Python's own speed caps are separate and lower).
 const LARGE_DATA_BYTES = 64 * 1024 * 1024
 
 const errors = []

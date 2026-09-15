@@ -28,6 +28,11 @@ from cloud_portable_s3vectors import datagen
 v = next(v for v in mp["vectors"] if v["id"] == "multipart-0001")
 part1 = datagen.generate(v["data"], "part1")       # bytes
 etag = datagen.derived(v["data"], "big", "etag")   # '"<md5hex>"'
+
+# datasets are seekable: read a window, or stream one too big to hold
+window = datagen.generate_range(v["data"], "big", 1024, 256)   # bytes
+for chunk in datagen.generate_stream(v["data"], "big"):        # Iterator[bytes]
+    ...
 ```
 
 `s3v.manifest()` reports the corpus version, per-group counts and the schema

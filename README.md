@@ -76,9 +76,9 @@ Every vector has:
   runs to gigabytes (the 5 GiB copy-source limit needs a source over 5 GiB), so a
   routine run can skip it by tag, quirk markers, and free-form compliance overlays
   (`soc2`). `large` is required on any vector declaring a dataset over 64 MiB, and
-  the validator enforces it: the package test suites skip generating a dataset that
-  big, so the tag is what keeps a gigabyte-scale vector from losing that coverage
-  silently.
+  the validator enforces it: the package test suites never materialize a dataset
+  that big, they spot-check it with ranged reads, so the tag is what tells a runner
+  the vector costs gigabytes to execute.
   Quirk markers share the `quirk:` prefix and flag behavior a general-purpose AWS S3
   endpoint does not reproduce, so a target tracking AWS filters them by prefix (see
   `quirk:*` filtering in the runner packages): `quirk:not-aws` (a non-AWS implementation
@@ -249,8 +249,26 @@ Datasets are referenced two ways:
    checksums and ranged-GET digests are written. Multipart *composite* ETags have no
    derived value; assert them with a pattern, e.g. `{ "$matches": "-2\"$" }`.
 
+#### Ranged reads
+
+Both generators are seekable, and every implementation must be able to produce
+`data[offset : offset+length]` without materializing the rest:
+
+- **`$prng`** — the range starts in block `offset / 32` at byte `offset % 32`, so a
+  range needs only blocks `offset / 32` through `(offset + length - 1) / 32`.
+- **`$pattern`** — byte `i` of the range is `pattern[(offset + i) % L]`, where `L` is
+  the pattern length.
+- **`$slice`** — delegates to its parent at `parent_offset + offset`. Parents are never
+  slices, so delegation is one level deep and the parent is never generated.
+
+A range with `offset + length > size` is an error. A zero-length range is legal and
+returns empty, including at `offset == size`. Derived values are defined over the
+whole dataset but are computed in chunks, so a multi-gigabyte dataset needs only a
+chunk of memory; `size` is read from the declaration and costs nothing.
+
 `scripts/datagen.js` is the reference implementation (`--self-test` includes
-independently computed check values).
+independently computed check values and checks a range against the corresponding
+window of the whole dataset).
 
 ### Expectations
 

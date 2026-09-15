@@ -4,9 +4,9 @@ All four packages (npm, PyPI, crates.io, Go module) release in **lockstep**: one
 version number identifies the corpus snapshot. `packages/VERSION` is the only
 place the version is authored; everything else is stamped by the sync script.
 
-Version bumps: adding vectors = minor; fixing a vector's expectation = patch or
-minor by judgment; schema/model breaking change = major (note: a 2.0 requires
-the Go module path to become `.../packages/go/v2`).
+Version bumps: adding vectors = minor; adding public API surface = minor; fixing
+a vector's expectation = patch or minor by judgment; schema/model breaking change
+= major (note: a 2.0 requires the Go module path to become `.../packages/go/v2`).
 
 ## Normal path (automated)
 

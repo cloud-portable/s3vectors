@@ -30,12 +30,22 @@ bytes. The `datagen` module materializes them and computes the digest values tha
 `${data.<name>.<field>}` placeholders resolve to:
 
 ```js
-import { generate, derived } from '@cloud-portable/s3vectors/datagen'
+import { generate, generateRange, generateStream, derived } from '@cloud-portable/s3vectors/datagen'
 
 const v = multipart.vectors.find(v => v.id === 'multipart-0001')
 const part1 = generate(v.data, 'part1')          // Buffer
 const md5 = derived(v.data, 'big', 'md5')        // lowercase hex
 const etag = derived(v.data, 'big', 'etag')      // '"<md5hex>"'
+```
+
+Datasets are seekable. Read a window without materializing the rest, or stream a
+dataset too big to hold in memory — the stream is a web `ReadableStream`, so it can
+go straight into `fetch` as a request body:
+
+```js
+const window = generateRange(v.data, 'big', 1024, 256)   // Buffer, 256 bytes
+const body = generateStream(v.data, 'big')               // ReadableStream<Buffer>
+await fetch(url, { method: 'PUT', body, duplex: 'half' })
 ```
 
 TypeScript types for the full vector model are included.
