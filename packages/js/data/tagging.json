@@ -2115,29 +2115,16 @@
             "expect": {
               "response": {
                 "TagSet": {
-                  "$contains": {
-                    "Key": "Cost-Center",
-                    "Value": "12345"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "special-tags.txt"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "Empty",
-                    "Value": ""
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "Cost-Center",
+                      "Value": "12345"
+                    },
+                    {
+                      "Key": "Empty",
+                      "Value": ""
+                    }
+                  ]
                 }
               }
             }
@@ -2672,48 +2659,20 @@
               "response": {
                 "TagSet": {
                   "$length": 3,
-                  "$contains": {
-                    "Key": "environment",
-                    "Value": "testing"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "tagged-object"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "application",
-                    "Value": "s3-tests"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "tagged-object"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "version",
-                    "Value": "1.0"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "environment",
+                      "Value": "testing"
+                    },
+                    {
+                      "Key": "application",
+                      "Value": "s3-tests"
+                    },
+                    {
+                      "Key": "version",
+                      "Value": "1.0"
+                    }
+                  ]
                 }
               }
             }
@@ -2861,29 +2820,16 @@
             "expect": {
               "response": {
                 "TagSet": {
-                  "$contains": {
-                    "Key": "stage",
-                    "Value": "prod"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "tagged-object"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "region",
-                    "Value": "us-east-1"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "stage",
+                      "Value": "prod"
+                    },
+                    {
+                      "Key": "region",
+                      "Value": "us-east-1"
+                    }
+                  ]
                 }
               }
             }
@@ -2986,48 +2932,20 @@
             "expect": {
               "response": {
                 "TagSet": {
-                  "$contains": {
-                    "Key": "path",
-                    "Value": "/usr/local/bin"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "tagged-object"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "email",
-                    "Value": "test@example.com"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "tagged-object"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "description",
-                    "Value": "Test object with spaces and symbols"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "path",
+                      "Value": "/usr/local/bin"
+                    },
+                    {
+                      "Key": "email",
+                      "Value": "test@example.com"
+                    },
+                    {
+                      "Key": "description",
+                      "Value": "Test object with spaces and symbols"
+                    }
+                  ]
                 }
               }
             }
@@ -3374,29 +3292,16 @@
             "expect": {
               "response": {
                 "TagSet": {
-                  "$contains": {
-                    "Key": "key1",
-                    "Value": "value1"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "tagged-object"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "key2",
-                    "Value": "value2"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "key1",
+                      "Value": "value1"
+                    },
+                    {
+                      "Key": "key2",
+                      "Value": "value2"
+                    }
+                  ]
                 }
               }
             }
@@ -3824,28 +3729,16 @@
               "response": {
                 "TagSet": {
                   "$length": 2,
-                  "$contains": {
-                    "Key": "key1",
-                    "Value": "val1"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketTagging",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "key2",
-                    "Value": "val2"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "key1",
+                      "Value": "val1"
+                    },
+                    {
+                      "Key": "key2",
+                      "Value": "val2"
+                    }
+                  ]
                 }
               }
             }
@@ -4199,28 +4092,16 @@
               "response": {
                 "TagSet": {
                   "$length": 2,
-                  "$contains": {
-                    "Key": "key2",
-                    "Value": "val2"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketTagging",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "key3",
-                    "Value": "val3"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "key2",
+                      "Value": "val2"
+                    },
+                    {
+                      "Key": "key3",
+                      "Value": "val3"
+                    }
+                  ]
                 }
               }
             }
@@ -4279,29 +4160,16 @@
             "expect": {
               "response": {
                 "TagSet": {
-                  "$contains": {
-                    "Key": "key1",
-                    "Value": "value1"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "tagged-object"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "key2",
-                    "Value": "value2"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "key1",
+                      "Value": "value1"
+                    },
+                    {
+                      "Key": "key2",
+                      "Value": "value2"
+                    }
+                  ]
                 }
               }
             }

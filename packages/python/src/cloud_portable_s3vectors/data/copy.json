@@ -2381,29 +2381,16 @@
               "response": {
                 "TagSet": {
                   "$length": 2,
-                  "$contains": {
-                    "Key": "tag1",
-                    "Value": "value1"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "dest-obj"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "tag2",
-                    "Value": "value2"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "tag1",
+                      "Value": "value1"
+                    },
+                    {
+                      "Key": "tag2",
+                      "Value": "value2"
+                    }
+                  ]
                 }
               }
             }
@@ -2465,29 +2452,16 @@
               "response": {
                 "TagSet": {
                   "$length": 2,
-                  "$contains": {
-                    "Key": "new",
-                    "Value": "tag"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "dest-obj"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "another",
-                    "Value": "tag"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "new",
+                      "Value": "tag"
+                    },
+                    {
+                      "Key": "another",
+                      "Value": "tag"
+                    }
+                  ]
                 }
               }
             }
