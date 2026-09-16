@@ -383,7 +383,8 @@
         "$ne": { "type": ["string", "number", "boolean", "null"] },
         "$matches": { "type": "string", "format": "regex" },
         "$length": { "type": "integer", "minimum": 0 },
-        "$contains": { "$ref": "#/$defs/matcher" }
+        "$contains": { "$ref": "#/$defs/matcher" },
+        "$containsAll": { "type": "array", "items": { "$ref": "#/$defs/matcher" } }
       },
       "additionalProperties": false
     },

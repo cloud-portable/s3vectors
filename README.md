@@ -301,7 +301,11 @@ omitted/empty `expect` means the step must succeed (no error, 2xx).
   the portable subset valid in both ECMA-262 and RE2 — no lookaheads, lookbehinds or
   backreferences — so native regex engines work in every language, including Go's
   `regexp` and Rust's `regex`), `{"$length": n}` (arrays/strings),
-  `{"$contains": matcher}` (some array element matches — unordered membership).
+  `{"$contains": matcher}` (some array element matches — unordered membership),
+  `{"$containsAll": [matcher, ...]}` (every listed matcher matches some element:
+  unordered membership of a whole set, for responses whose order is unspecified.
+  The matchers are independent, so two of them may match the same element;
+  pairing it with `$length` is what pins set equality).
   When an assertion object has multiple `$`-keys, ALL of them must hold (AND) —
   e.g. `{"$ne": "${cap.singleEtag}", "$matches": "-"}`.
 
