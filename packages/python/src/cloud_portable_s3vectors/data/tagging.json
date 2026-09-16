@@ -579,6 +579,7 @@
       "group": "tagging",
       "kind": "api",
       "title": "Bucket policy allowing s3:GetObjectTagging to everyone lets another account read object tags",
+      "description": "S3 does not specify an order for the tags in a TagSet, and real S3 returns neither insertion nor sorted order, so membership is asserted with $length + $contains rather than an ordered array.",
       "tags": [
         "tier-3",
         "tagging",
@@ -682,48 +683,33 @@
             "identity": "alt",
             "expect": {
               "response": {
-                "TagSet": [
-                  {
+                "TagSet": {
+                  "$length": 10,
+                  "$contains": {
                     "Key": "0",
                     "Value": "0"
-                  },
-                  {
-                    "Key": "1",
-                    "Value": "1"
-                  },
-                  {
-                    "Key": "2",
-                    "Value": "2"
-                  },
-                  {
-                    "Key": "3",
-                    "Value": "3"
-                  },
-                  {
-                    "Key": "4",
-                    "Value": "4"
-                  },
-                  {
-                    "Key": "5",
-                    "Value": "5"
-                  },
-                  {
-                    "Key": "6",
-                    "Value": "6"
-                  },
-                  {
-                    "Key": "7",
-                    "Value": "7"
-                  },
-                  {
-                    "Key": "8",
-                    "Value": "8"
-                  },
-                  {
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "GetObjectTagging",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "testputtagsacl"
+            },
+            "identity": "alt",
+            "expect": {
+              "response": {
+                "TagSet": {
+                  "$contains": {
                     "Key": "9",
                     "Value": "9"
                   }
-                ]
+                }
               }
             }
           }
@@ -735,6 +721,7 @@
       "group": "tagging",
       "kind": "api",
       "title": "DeleteObjectTagging returns 204 and removes all tags",
+      "description": "S3 does not specify an order for the tags in a TagSet, and real S3 returns neither insertion nor sorted order, so membership is asserted with $length + $contains rather than an ordered array.",
       "tags": [
         "tier-3",
         "tagging",
@@ -790,16 +777,32 @@
             },
             "expect": {
               "response": {
-                "TagSet": [
-                  {
+                "TagSet": {
+                  "$length": 2,
+                  "$contains": {
                     "Key": "0",
                     "Value": "0"
-                  },
-                  {
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "GetObjectTagging",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "testputmodifytags"
+            },
+            "expect": {
+              "response": {
+                "TagSet": {
+                  "$contains": {
                     "Key": "1",
                     "Value": "1"
                   }
-                ]
+                }
               }
             }
           }
@@ -1250,6 +1253,7 @@
       "group": "tagging",
       "kind": "api",
       "title": "PutObjectTagging accepts the maximum of 10 tags and returns them all",
+      "description": "S3 does not specify an order for the tags in a TagSet, and real S3 returns neither insertion nor sorted order, so membership is asserted with $length + $contains rather than an ordered array.",
       "tags": [
         "tier-3",
         "tagging",
@@ -1337,48 +1341,32 @@
             },
             "expect": {
               "response": {
-                "TagSet": [
-                  {
+                "TagSet": {
+                  "$length": 10,
+                  "$contains": {
                     "Key": "0",
                     "Value": "0"
-                  },
-                  {
-                    "Key": "1",
-                    "Value": "1"
-                  },
-                  {
-                    "Key": "2",
-                    "Value": "2"
-                  },
-                  {
-                    "Key": "3",
-                    "Value": "3"
-                  },
-                  {
-                    "Key": "4",
-                    "Value": "4"
-                  },
-                  {
-                    "Key": "5",
-                    "Value": "5"
-                  },
-                  {
-                    "Key": "6",
-                    "Value": "6"
-                  },
-                  {
-                    "Key": "7",
-                    "Value": "7"
-                  },
-                  {
-                    "Key": "8",
-                    "Value": "8"
-                  },
-                  {
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "GetObjectTagging",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "testputmaxtags"
+            },
+            "expect": {
+              "response": {
+                "TagSet": {
+                  "$contains": {
                     "Key": "9",
                     "Value": "9"
                   }
-                ]
+                }
               }
             }
           }
@@ -1390,6 +1378,7 @@
       "group": "tagging",
       "kind": "api",
       "title": "A second PutObjectTagging replaces the previous tag set entirely",
+      "description": "S3 does not specify an order for the tags in a TagSet: this vector's source test asserts list equality, but real S3 returns key2 before key, so membership is asserted with $length + $contains rather than an ordered array.",
       "tags": [
         "tier-3",
         "tagging",
@@ -1445,16 +1434,32 @@
             },
             "expect": {
               "response": {
-                "TagSet": [
-                  {
+                "TagSet": {
+                  "$length": 2,
+                  "$contains": {
                     "Key": "key",
                     "Value": "val"
-                  },
-                  {
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "GetObjectTagging",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "testputmodifytags"
+            },
+            "expect": {
+              "response": {
+                "TagSet": {
+                  "$contains": {
                     "Key": "key2",
                     "Value": "val2"
                   }
-                ]
+                }
               }
             }
           }
@@ -1505,6 +1510,7 @@
       "group": "tagging",
       "kind": "api",
       "title": "PutObject with an x-amz-tagging header (including a valueless tag) stores tags readable via GetObjectTagging",
+      "description": "S3 does not specify an order for the tags in a TagSet, and real S3 returns neither insertion nor sorted order, so membership is asserted with $length + $contains rather than an ordered array.",
       "tags": [
         "tier-3",
         "tagging",
@@ -1551,16 +1557,32 @@
             },
             "expect": {
               "response": {
-                "TagSet": [
-                  {
+                "TagSet": {
+                  "$length": 2,
+                  "$contains": {
                     "Key": "bar",
                     "Value": ""
-                  },
-                  {
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "GetObjectTagging",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "testtagobj1"
+            },
+            "expect": {
+              "response": {
+                "TagSet": {
+                  "$contains": {
                     "Key": "foo",
                     "Value": "bar"
                   }
-                ]
+                }
               }
             }
           }
@@ -1572,6 +1594,7 @@
       "group": "tagging",
       "kind": "api",
       "title": "Bucket policy allowing s3:PutObjectTagging to everyone lets another account write object tags",
+      "description": "S3 does not specify an order for the tags in a TagSet, and real S3 returns neither insertion nor sorted order, so membership is asserted with $length + $contains rather than an ordered array.",
       "tags": [
         "tier-3",
         "tagging",
@@ -1675,48 +1698,32 @@
             },
             "expect": {
               "response": {
-                "TagSet": [
-                  {
+                "TagSet": {
+                  "$length": 10,
+                  "$contains": {
                     "Key": "0",
                     "Value": "0"
-                  },
-                  {
-                    "Key": "1",
-                    "Value": "1"
-                  },
-                  {
-                    "Key": "2",
-                    "Value": "2"
-                  },
-                  {
-                    "Key": "3",
-                    "Value": "3"
-                  },
-                  {
-                    "Key": "4",
-                    "Value": "4"
-                  },
-                  {
-                    "Key": "5",
-                    "Value": "5"
-                  },
-                  {
-                    "Key": "6",
-                    "Value": "6"
-                  },
-                  {
-                    "Key": "7",
-                    "Value": "7"
-                  },
-                  {
-                    "Key": "8",
-                    "Value": "8"
-                  },
-                  {
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "GetObjectTagging",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "testputtagsacl"
+            },
+            "expect": {
+              "response": {
+                "TagSet": {
+                  "$contains": {
                     "Key": "9",
                     "Value": "9"
                   }
-                ]
+                }
               }
             }
           }
@@ -1820,6 +1827,7 @@
       "group": "tagging",
       "kind": "api",
       "title": "Tagging supplied on CreateMultipartUpload is readable after complete and removable via DeleteObjectTagging",
+      "description": "S3 does not specify an order for the tags in a TagSet, and real S3 returns neither insertion nor sorted order, so membership is asserted with $length + $contains rather than an ordered array.",
       "tags": [
         "tier-3",
         "tagging",
@@ -1893,16 +1901,32 @@
             },
             "expect": {
               "response": {
-                "TagSet": [
-                  {
+                "TagSet": {
+                  "$length": 2,
+                  "$contains": {
                     "Key": "Hello",
                     "Value": "World"
-                  },
-                  {
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "$operation": {
+            "name": "GetObjectTagging",
+            "params": {
+              "Bucket": "${res.b1.name}",
+              "Key": "mymultipart"
+            },
+            "expect": {
+              "response": {
+                "TagSet": {
+                  "$contains": {
                     "Key": "foo",
                     "Value": "bar"
                   }
-                ]
+                }
               }
             }
           }
