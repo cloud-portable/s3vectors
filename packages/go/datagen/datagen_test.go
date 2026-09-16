@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"io"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -442,5 +443,24 @@ func TestFullCorpusDatagen(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestGenerateDoesNotAllocatePerBlock(t *testing.T) {
+	// The prng digest is written into a caller-owned array: heap-allocating it
+	// per 32-byte block cost ~32k allocations and a byte of garbage per byte
+	// generated. One allocation for the output buffer is expected.
+	specs := map[string]s3vectors.DataSpec{
+		"d": {Prng: &s3vectors.PrngData{Seed: "alloc", Size: 1 << 20}},
+	}
+	var m0, m1 runtime.MemStats
+	runtime.GC()
+	runtime.ReadMemStats(&m0)
+	if _, err := Generate(specs, "d"); err != nil {
+		t.Fatal(err)
+	}
+	runtime.ReadMemStats(&m1)
+	if got := m1.Mallocs - m0.Mallocs; got > 8 {
+		t.Errorf("Generate made %d allocations for 1 MiB of prng; want a handful", got)
 	}
 }

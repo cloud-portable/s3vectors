@@ -241,10 +241,15 @@ fn read_into(src: &Source, offset: u64, dst: &mut [u8]) {
     }
 
     // block(i) = SHA256(UTF8(seed) || BE64(i)); stream = block(0) || block(1) || ...
-    let seed = src.seed.as_deref().unwrap_or(&[]);
-    for i in (abs / 32)..=((abs + n - 1) / 32) {
+    // The seed is absorbed once and the state cloned per block; re-absorbing it
+    // every block costs about 17% more.
+    let seeded = {
         let mut h = Sha256::new();
-        h.update(seed);
+        h.update(src.seed.as_deref().unwrap_or(&[]));
+        h
+    };
+    for i in (abs / 32)..=((abs + n - 1) / 32) {
+        let mut h = seeded.clone();
         h.update(i.to_be_bytes());
         let block = h.finalize();
         let blk_start = i * 32;

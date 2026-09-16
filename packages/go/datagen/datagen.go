@@ -147,12 +147,13 @@ func readInto(src source, offset int64, dst []byte) {
 
 	// block(i) = SHA256(UTF8(seed) || BE64(i)); stream = block(0) || block(1) || ...
 	var counter [8]byte
+	var digest [sha256.Size]byte // Sum appends here, so no per-block allocation
 	for i := abs / 32; i <= (abs+n-1)/32; i++ {
 		binary.BigEndian.PutUint64(counter[:], uint64(i))
 		h := sha256.New()
 		h.Write(src.seed)
 		h.Write(counter[:])
-		block := h.Sum(nil)
+		block := h.Sum(digest[:0])
 		blkStart := i * 32
 		lo := blkStart // head trim, nonzero on the first block only
 		if abs > lo {
