@@ -4114,7 +4114,7 @@
       "group": "tagging",
       "kind": "api",
       "title": "PutObject with Tagging sets tags readable via GetObjectTagging",
-      "description": "Two GetObjectTagging steps assert membership of each tag independently, mirroring the original's unordered dict comparison.",
+      "description": "A single GetObjectTagging step asserts membership of both tags, mirroring the original's unordered dict comparison.",
       "tags": [
         "tier-3",
         "tagging",
