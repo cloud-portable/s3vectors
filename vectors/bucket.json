@@ -710,69 +710,23 @@
             "expect": {
               "response": {
                 "Buckets": {
-                  "$contains": {
-                    "Name": "${res.b1.name}"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "ListBuckets",
-            "params": {},
-            "expect": {
-              "response": {
-                "Buckets": {
-                  "$contains": {
-                    "Name": "${res.b2.name}"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "ListBuckets",
-            "params": {},
-            "expect": {
-              "response": {
-                "Buckets": {
-                  "$contains": {
-                    "Name": "${res.b3.name}"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "ListBuckets",
-            "params": {},
-            "expect": {
-              "response": {
-                "Buckets": {
-                  "$contains": {
-                    "Name": "${res.b4.name}"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "ListBuckets",
-            "params": {},
-            "expect": {
-              "response": {
-                "Buckets": {
-                  "$contains": {
-                    "Name": "${res.b5.name}"
-                  }
+                  "$containsAll": [
+                    {
+                      "Name": "${res.b1.name}"
+                    },
+                    {
+                      "Name": "${res.b2.name}"
+                    },
+                    {
+                      "Name": "${res.b3.name}"
+                    },
+                    {
+                      "Name": "${res.b4.name}"
+                    },
+                    {
+                      "Name": "${res.b5.name}"
+                    }
+                  ]
                 }
               }
             }
@@ -1876,24 +1830,14 @@
             "expect": {
               "response": {
                 "Buckets": {
-                  "$contains": {
-                    "Name": "${res.b1.name}"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "ListBuckets",
-            "params": {},
-            "expect": {
-              "response": {
-                "Buckets": {
-                  "$contains": {
-                    "Name": "${res.b2.name}"
-                  }
+                  "$containsAll": [
+                    {
+                      "Name": "${res.b1.name}"
+                    },
+                    {
+                      "Name": "${res.b2.name}"
+                    }
+                  ]
                 }
               }
             }

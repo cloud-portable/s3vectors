@@ -292,43 +292,17 @@
             "expect": {
               "response": {
                 "Uploads": {
-                  "$contains": {
-                    "UploadId": "${cap.u1}"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "ListMultipartUploads",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "Uploads": {
-                  "$contains": {
-                    "UploadId": "${cap.u2}"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "ListMultipartUploads",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "Uploads": {
-                  "$contains": {
-                    "UploadId": "${cap.u3}"
-                  }
+                  "$containsAll": [
+                    {
+                      "UploadId": "${cap.u1}"
+                    },
+                    {
+                      "UploadId": "${cap.u2}"
+                    },
+                    {
+                      "UploadId": "${cap.u3}"
+                    }
+                  ]
                 }
               }
             }
@@ -16102,29 +16076,16 @@
               "response": {
                 "TagSet": {
                   "$length": 2,
-                  "$contains": {
-                    "Key": "tag1",
-                    "Value": "value1"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "my-obj"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "tag2",
-                    "Value": "value2"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "tag1",
+                      "Value": "value1"
+                    },
+                    {
+                      "Key": "tag2",
+                      "Value": "value2"
+                    }
+                  ]
                 }
               }
             }
@@ -19170,29 +19131,16 @@
               "response": {
                 "TagSet": {
                   "$length": 2,
-                  "$contains": {
-                    "Key": "key1",
-                    "Value": "val1"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectTagging",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "my-obj"
-            },
-            "expect": {
-              "response": {
-                "TagSet": {
-                  "$contains": {
-                    "Key": "key2",
-                    "Value": "val2"
-                  }
+                  "$containsAll": [
+                    {
+                      "Key": "key1",
+                      "Value": "val1"
+                    },
+                    {
+                      "Key": "key2",
+                      "Value": "val2"
+                    }
+                  ]
                 }
               }
             }

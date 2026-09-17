@@ -736,48 +736,36 @@
               "response": {
                 "Grants": {
                   "$length": 2,
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${cap.ownerId}",
+                        "DisplayName": "${cap.ownerName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${cap.ownerId}",
-                      "DisplayName": "${cap.ownerName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
@@ -919,48 +907,36 @@
               "response": {
                 "Grants": {
                   "$length": 2,
-                  "$contains": {
-                    "Permission": "READ",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "READ",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${cap.ownerId}",
+                        "DisplayName": "${cap.ownerName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${cap.ownerId}",
-                      "DisplayName": "${cap.ownerName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
@@ -1095,48 +1071,36 @@
               "response": {
                 "Grants": {
                   "$length": 2,
-                  "$contains": {
-                    "Permission": "READ_ACP",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "READ_ACP",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${cap.ownerId}",
+                        "DisplayName": "${cap.ownerName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${cap.ownerId}",
-                      "DisplayName": "${cap.ownerName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
@@ -1271,48 +1235,36 @@
               "response": {
                 "Grants": {
                   "$length": 2,
-                  "$contains": {
-                    "Permission": "WRITE",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "WRITE",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${cap.ownerId}",
+                        "DisplayName": "${cap.ownerName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${cap.ownerId}",
-                      "DisplayName": "${cap.ownerName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
@@ -1447,48 +1399,36 @@
               "response": {
                 "Grants": {
                   "$length": 2,
-                  "$contains": {
-                    "Permission": "WRITE_ACP",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "WRITE_ACP",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${cap.ownerId}",
+                        "DisplayName": "${cap.ownerName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${cap.ownerId}",
-                      "DisplayName": "${cap.ownerName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
@@ -2048,50 +1988,36 @@
               "response": {
                 "Grants": {
                   "$length": 2,
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${cap.ownerId}",
+                        "DisplayName": "${cap.ownerName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectAcl",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "foo"
-            },
-            "identity": "alt",
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${cap.ownerId}",
-                      "DisplayName": "${cap.ownerName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
@@ -2179,50 +2105,36 @@
               "response": {
                 "Grants": {
                   "$length": 2,
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "READ",
+                      "Grantee": {
+                        "ID": "${cap.ownerId}",
+                        "DisplayName": "${cap.ownerName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetObjectAcl",
-            "params": {
-              "Bucket": "${res.b1.name}",
-              "Key": "foo"
-            },
-            "identity": "alt",
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "READ",
-                    "Grantee": {
-                      "ID": "${cap.ownerId}",
-                      "DisplayName": "${cap.ownerName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
@@ -3237,50 +3149,38 @@
               "response": {
                 "Grants": {
                   "$length": 2,
-                  "$contains": {
-                    "Permission": "READ",
-                    "Grantee": {
-                      "Type": "Group",
-                      "URI": "http://acs.amazonaws.com/groups/global/AllUsers",
-                      "ID": {
-                        "$absent": true
-                      },
-                      "DisplayName": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "READ",
+                      "Grantee": {
+                        "Type": "Group",
+                        "URI": "http://acs.amazonaws.com/groups/global/AllUsers",
+                        "ID": {
+                          "$absent": true
+                        },
+                        "DisplayName": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${cap.ownerId}",
+                        "DisplayName": "${cap.ownerName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "${res.b1.name}"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${cap.ownerId}",
-                      "DisplayName": "${cap.ownerName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
@@ -6201,132 +6101,78 @@
               "response": {
                 "Grants": {
                   "$length": 5,
-                  "$contains": {
-                    "Permission": "READ",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
+                  "$containsAll": [
+                    {
+                      "Permission": "READ",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "WRITE",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "READ_ACP",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "WRITE_ACP",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
+                      }
+                    },
+                    {
+                      "Permission": "FULL_CONTROL",
+                      "Grantee": {
+                        "ID": "${res.alt.canonicalId}",
+                        "DisplayName": "${res.alt.displayName}",
+                        "Type": "CanonicalUser",
+                        "URI": {
+                          "$absent": true
+                        },
+                        "EmailAddress": {
+                          "$absent": true
+                        }
                       }
                     }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "s3v-ceph-bucket-header-acl-grants"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "WRITE",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "s3v-ceph-bucket-header-acl-grants"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "READ_ACP",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "s3v-ceph-bucket-header-acl-grants"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "WRITE_ACP",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "$operation": {
-            "name": "GetBucketAcl",
-            "params": {
-              "Bucket": "s3v-ceph-bucket-header-acl-grants"
-            },
-            "expect": {
-              "response": {
-                "Grants": {
-                  "$contains": {
-                    "Permission": "FULL_CONTROL",
-                    "Grantee": {
-                      "ID": "${res.alt.canonicalId}",
-                      "DisplayName": "${res.alt.displayName}",
-                      "Type": "CanonicalUser",
-                      "URI": {
-                        "$absent": true
-                      },
-                      "EmailAddress": {
-                        "$absent": true
-                      }
-                    }
-                  }
+                  ]
                 }
               }
             }
